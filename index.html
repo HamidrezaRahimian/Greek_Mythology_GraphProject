@@ -8,7 +8,8 @@
 
     <!-- ✅ Load libraries FIRST -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/neo4j-driver/5.15.0/neo4j-driver.min.js"></script>
+    <!-- ✅ FIXED: Using correct Neo4j driver CDN URL -->
+    <script src="https://unpkg.com/neo4j-driver@5.22.0/lib/browser/neo4j-web.min.js"></script>
 
     <style>
         /* 👇 Your styles unchanged */
@@ -187,18 +188,32 @@
     <!-- ✅ APP LOGIC GOES HERE AFTER LIBRARIES ARE LOADED -->
     <script>
         window.onload = async function () {
+            // ✅ FIXED: Check for neo4j in the correct scope
             if (typeof neo4j === "undefined") {
                 document.getElementById("loading").innerHTML = `
           ❌ <strong>Neo4j library failed to load!</strong><br/>
-          Make sure your internet is working and the script URL is correct.`;
+          Make sure your internet is working and the script URL is correct.<br/>
+          <small>Using URL: https://unpkg.com/neo4j-driver@5.22.0/lib/browser/neo4j-web.min.js</small>`;
                 console.error("Neo4j driver not defined. Make sure script loaded properly.");
                 return;
             }
 
-            const driver = neo4j.driver(
-                'neo4j+s://10634e70.databases.neo4j.io',
-                neo4j.auth.basic('neo4j', 'jTeHUI2t2iie3kZyLGVNJtmnQqdjHAP6Lcfo0FkzfuI')
-            );
+            console.log("✅ Neo4j driver loaded successfully:", typeof neo4j);
+
+            let driver;
+            try {
+                driver = neo4j.driver(
+                    'neo4j+s://10634e70.databases.neo4j.io',
+                    neo4j.auth.basic('neo4j', 'jTeHUI2t2iie3kZyLGVNJtmnQqdjHAP6Lcfo0FkzfuI')
+                );
+                console.log("✅ Neo4j driver created successfully");
+            } catch (error) {
+                console.error("❌ Error creating Neo4j driver:", error);
+                document.getElementById("loading").innerHTML = `
+          ❌ <strong>Error creating Neo4j driver!</strong><br/>
+          ${error.message}`;
+                return;
+            }
 
             const colorMap = {
                 'Olympian god': '#ff6b6b',
@@ -223,7 +238,10 @@
             async function loadGraphData() {
                 const session = driver.session();
                 try {
-                    const result = await session.run(`MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`);
+                    console.log("🔍 Executing Neo4j query...");
+                    const result = await session.run(`MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m LIMIT 100`);
+                    console.log("✅ Query executed, processing results...");
+
                     const nodes = new Map();
                     const links = [];
 
@@ -259,6 +277,8 @@
                         }
                     });
 
+                    console.log(`✅ Data processed: ${nodes.size} nodes, ${links.length} links`);
+
                     return {
                         nodes: Array.from(nodes.values()),
                         links
@@ -270,6 +290,7 @@
 
             function createVisualization(data) {
                 document.getElementById('loading').style.display = 'none';
+                console.log("🎨 Creating visualization...");
 
                 const link = svg.append('g')
                     .selectAll('line')
@@ -341,16 +362,23 @@
                 }
             }
 
-            loadGraphData()
-                .then(createVisualization)
-                .catch(err => {
-                    console.error(err);
-                    document.getElementById("loading").innerHTML = `
-            ❌ Error loading graph data<br/>
-            ${err.message}`;
-                });
+            try {
+                const data = await loadGraphData();
+                createVisualization(data);
+                console.log("🎉 Visualization created successfully!");
+            } catch (err) {
+                console.error("❌ Error loading graph data:", err);
+                document.getElementById("loading").innerHTML = `
+            ❌ <strong>Error loading graph data</strong><br/>
+            ${err.message}<br/>
+            <small>Check console for more details</small>`;
+            }
 
-            window.addEventListener("beforeunload", () => driver.close());
+            window.addEventListener("beforeunload", () => {
+                if (driver) {
+                    driver.close();
+                }
+            });
         };
     </script>
 </body>
