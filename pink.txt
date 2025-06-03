@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Greek Mythology Interactive Graph</title>
+
+    <!-- Load libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://unpkg.com/neo4j-driver@5.22.0/lib/browser/neo4j-web.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gold: #FFD700;
+            --dark-gold: #B8860B;
+            --light-gold: #FFEF94;
+            --hell-red: #FF4444;
+            --hell-orange: #FF8C42;
+            --hell-purple: #8B5CF6;
+            --deep-purple: #6B46C1;
+            --shadow-purple: #4C1D95;
+            --white: #FFFFFF;
+            --light-gray: #F8FAFC;
+            --medium-gray: #64748B;
+            --dark-gray: #1E293B;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--dark-gray);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-gold), var(--hell-orange), var(--hell-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 212, 0, 0.5);
+            margin: 0;
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: var(--white);
+            font-size: 0.875rem;
+        }
+
+        select,
+        input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--dark-gray);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        #searchInput {
+            padding-left: 2.5rem;
+            width: 200px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--medium-gray);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--hell-orange), var(--hell-red));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.3);
+        }
+
+        .relationships-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .relationships-panel h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .relationship-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .relationship-checkbox:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .relationship-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-gold);
+        }
+
+        .relationship-checkbox label {
+            color: var(--white);
+            font-size: 0.875rem;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .legend {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .legend h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item span {
+            color: var(--white);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .graph-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node {
+            cursor: pointer;
+            stroke-width: 3px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+            transform: scale(1.1);
+        }
+
+        .node.highlighted {
+            stroke-width: 5px;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+        }
+
+        .link {
+            stroke-width: 2px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .link.highlighted {
+            stroke-width: 4px;
+            opacity: 1;
+        }
+
+        .node-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--white);
+            text-anchor: middle;
+            dominant-baseline: central;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .relationship-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            fill: var(--primary-gold);
+            text-anchor: middle;
+            dominant-baseline: central;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 0.95));
+            color: var(--white);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--primary-gold);
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 2000;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 250px;
+        }
+
+        .tooltip h4 {
+            color: var(--primary-gold);
+            margin-bottom: 0.5rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-left: 4px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            color: var(--white);
+            font-size: 0.875rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gold);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-gold);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-crown"></i> Greek Mythology Graph</h1>
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="limitSelect"><i class="fas fa-list-ol"></i> Limit:</label>
+                    <select id="limitSelect">
+                        <option value="25">25 nodes</option>
+                        <option value="100" selected>100 nodes</option>
+                        <option value="all">All nodes</option>
+                    </select>
+                </div>
+
+                <div class="control-group search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search character...">
+                </div>
+
+                <button class="btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+
+                <button class="btn" id="centerBtn">
+                    <i class="fas fa-crosshairs"></i> Center
+                </button>
+            </div>
+        </div>
+
+        <div class="relationships-panel">
+            <h3><i class="fas fa-project-diagram"></i> Relationships</h3>
+            <div id="relationshipFilters">
+                <!-- Dynamic relationship checkboxes will be added here -->
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3><i class="fas fa-palette"></i> Character Types</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);"></div>
+                <span>Olympian Gods</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #4ECDC4, #7EDDD7);"></div>
+                <span>Greek Deities</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #45B7D1, #74C7E3);"></div>
+                <span>Lunar Deities</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #96CEB4, #B8DCCB);"></div>
+                <span>Goddesses</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #FECA57, #FED886);"></div>
+                <span>Mythological Characters</span>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div style="color: white; font-size: 1.2rem; margin-bottom: 0.5rem;">
+                    <i class="fas fa-magic"></i> Loading Mythology...
+                </div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                    Connecting to the realm of gods...
+                </div>
+            </div>
+            <svg id="graph"></svg>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-item">
+                <i class="fas fa-mouse"></i>
+                <span>Drag nodes to explore</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-eye"></i>
+                <span>Hover for details</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-search-plus"></i>
+                <span>Search to focus</span>
+            </div>
+        </div>
+
+        <div class="tooltip" id="tooltip" style="display: none;"></div>
+    </div>
+
+    <script>
+        let driver, allData, currentData, simulation, svg, tooltip;
+        let selectedRelationships = new Set();
+        let searchTerm = '';
+
+        const colorMap = {
+            'Olympian god': 'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
+            'Greek deity': 'linear-gradient(135deg, #4ECDC4, #7EDDD7)',
+            'lunar deity': 'linear-gradient(135deg, #45B7D1, #74C7E3)',
+            'goddess': 'linear-gradient(135deg, #96CEB4, #B8DCCB)',
+            'mythological Greek character': 'linear-gradient(135deg, #FECA57, #FED886)'
+        };
+
+        const relationshipColors = {
+            'FATHER_OF': '#FF6B6B',
+            'MOTHER_OF': '#FF8E8E',
+            'BROTHER_OF': '#4ECDC4',
+            'SISTER_OF': '#7EDDD7',
+            'HUSBAND_OF': '#45B7D1',
+            'WIFE_OF': '#74C7E3',
+            'SON_OF': '#96CEB4',
+            'DAUGHTER_OF': '#B8DCCB',
+            'LOVER_OF': '#FECA57',
+            'PARENT_OF': '#FED886'
+        };
+
+        window.onload = async function () {
+            if (typeof neo4j === "undefined") {
+                showError("Neo4j library failed to load!");
+                return;
+            }
+
+            try {
+                driver = neo4j.driver(
+                    'neo4j+s://10634e70.databases.neo4j.io',
+                    neo4j.auth.basic('neo4j', 'jTeHUI2t2iie3kZyLGVNJtmnQqdjHAP6Lcfo0FkzfuI')
+                );
+
+                await initializeVisualization();
+                setupEventListeners();
+
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            }
+        };
+
+        async function initializeVisualization() {
+            const container = document.querySelector('.graph-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            svg = d3.select('#graph')
+                .attr('width', width)
+                .attr('height', height);
+
+            tooltip = d3.select('#tooltip');
+
+            simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(120))
+                .force('charge', d3.forceManyBody().strength(-400))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(50));
+
+            await loadData();
+        }
+
+        async function loadData() {
+            const limit = document.getElementById('limitSelect').value;
+            const session = driver.session();
+
+            try {
+                let query = `MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`;
+                if (limit !== 'all') {
+                    query += ` LIMIT ${limit}`;
+                }
+
+                const result = await session.run(query);
+
+                const nodes = new Map();
+                const links = [];
+                const relationships = new Set();
+
+                result.records.forEach(record => {
+                    const n = record.get('n');
+                    const r = record.get('r');
+                    const m = record.get('m');
+
+                    if (n && !nodes.has(n.properties.id)) {
+                        nodes.set(n.properties.id, {
+                            id: n.properties.id,
+                            label: n.properties.label || n.properties.id,
+                            type: n.properties.type,
+                            color: getNodeColor(n.properties.type)
+                        });
+                    }
+
+                    if (m && r) {
+                        if (!nodes.has(m.properties.id)) {
+                            nodes.set(m.properties.id, {
+                                id: m.properties.id,
+                                label: m.properties.label || m.properties.id,
+                                type: m.properties.type,
+                                color: getNodeColor(m.properties.type)
+                            });
+                        }
+
+                        const relationshipType = r.type;
+                        relationships.add(relationshipType);
+
+                        links.push({
+                            source: n.properties.id,
+                            target: m.properties.id,
+                            relationship: relationshipType,
+                            color: relationshipColors[relationshipType] || '#888'
+                        });
+                    }
+                });
+
+                allData = {
+                    nodes: Array.from(nodes.values()),
+                    links: links
+                };
+
+                setupRelationshipFilters(Array.from(relationships));
+                updateVisualization();
+
+            } finally {
+                await session.close();
+            }
+        }
+
+        function getNodeColor(type) {
+            const gradient = colorMap[type] || 'linear-gradient(135deg, #888, #AAA)';
+            // For SVG, we'll use solid colors but keep gradients for reference
+            const solidColors = {
+                'Olympian god': '#FF6B6B',
+                'Greek deity': '#4ECDC4',
+                'lunar deity': '#45B7D1',
+                'goddess': '#96CEB4',
+                'mythological Greek character': '#FECA57'
+            };
+            return solidColors[type] || '#888';
+        }
+
+        function setupRelationshipFilters(relationships) {
+            const container = document.getElementById('relationshipFilters');
+            container.innerHTML = '';
+
+            // Select all by default
+            selectedRelationships = new Set(relationships);
+
+            relationships.forEach(rel => {
+                const div = document.createElement('div');
+                div.className = 'relationship-checkbox';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `rel-${rel}`;
+                checkbox.checked = true;
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        selectedRelationships.add(rel);
+                    } else {
+                        selectedRelationships.delete(rel);
+                    }
+                    updateVisualization();
+                });
+
+                const label = document.createElement('label');
+                label.htmlFor = `rel-${rel}`;
+                label.textContent = rel.replace(/_/g, ' ').toLowerCase();
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function filterData() {
+            if (!allData) return { nodes: [], links: [] };
+
+            let filteredLinks = allData.links.filter(link =>
+                selectedRelationships.has(link.relationship)
+            );
+
+            if (searchTerm) {
+                const searchNode = allData.nodes.find(node =>
+                    node.label.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                if (searchNode) {
+                    // Show only the searched node and its connections
+                    filteredLinks = filteredLinks.filter(link =>
+                        link.source === searchNode.id ||
+                        link.target === searchNode.id ||
+                        (typeof link.source === 'object' && link.source.id === searchNode.id) ||
+                        (typeof link.target === 'object' && link.target.id === searchNode.id)
+                    );
+                }
+            }
+
+            // Get all nodes that are connected by the filtered links
+            const connectedNodeIds = new Set();
+            filteredLinks.forEach(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                connectedNodeIds.add(sourceId);
+                connectedNodeIds.add(targetId);
+            });
+
+            const filteredNodes = allData.nodes.filter(node =>
+                connectedNodeIds.has(node.id) ||
+                (searchTerm && node.label.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            return { nodes: filteredNodes, links: filteredLinks };
+        }
+
+        function updateVisualization() {
+            currentData = filterData();
+            document.getElementById('loading').style.display = 'none';
+
+            // Clear previous visualization
+            svg.selectAll("*").remove();
+
+            // Create arrow markers for directed relationships
+            svg.append("defs").selectAll("marker")
+                .data(Object.keys(relationshipColors))
+                .enter().append("marker")
+                .attr("id", d => `arrow-${d}`)
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 25)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", d => relationshipColors[d]);
+
+            // Create links
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(currentData.links)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke", d => d.color)
+                .attr("marker-end", d => `url(#arrow-${d.relationship})`);
+
+            // Create relationship labels
+            const relationshipLabels = svg.append("g")
+                .selectAll("text")
+                .data(currentData.links)
+                .enter().append("text")
+                .attr("class", "relationship-label")
+                .text(d => d.relationship.replace(/_/g, ' '));
+
+            // Create nodes
+            const node = svg.append("g")
+                .selectAll("circle")
+                .data(currentData.nodes)
+                .enter().append("circle")
+                .attr("class", "node")
+                .attr("r", d => {
+                    if (d.id === 'Zeus') return 30;
+                    if (d.type === 'Olympian god') return 25;
+                    return 20;
+                })
+                .attr("fill", d => d.color)
+                .attr("stroke", d => searchTerm && d.label.toLowerCase().includes(searchTerm.toLowerCase()) ? '#FFD700' : '#FFFFFF')
+                .attr("stroke-width", d => searchTerm && d.label.toLowerCase().includes(searchTerm.toLowerCase()) ? 4 : 2)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            // Create node labels
+            const nodeLabels = svg.append("g")
+                .selectAll("text")
+                .data(currentData.nodes)
+                .enter().append("text")
+                .attr("class", "node-label")
+                .text(d => d.label);
+
+            // Add interactions
+            node.on("mouseover", (event, d) => {
+                tooltip.style("display", "block")
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 10) + "px")
+                    .html(`
+                        <h4><i class="fas fa-user-crown"></i> ${d.label}</h4>
+                        <div><strong>Type:</strong> ${d.type}</div>
+                        <div><strong>ID:</strong> ${d.id}</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.8;">
+                            Click to highlight connections
+                        </div>
+                    `);
+
+                // Highlight connected nodes and links
+                highlightConnections(d);
+            })
+                .on("mouseout", () => {
+                    tooltip.style("display", "none");
+                    clearHighlights();
+                })
+                .on("click", (event, d) => {
+                    document.getElementById('searchInput').value = d.label;
+                    searchTerm = d.label;
+                    updateVisualization();
+                });
+
+            // Setup simulation
+            simulation.nodes(currentData.nodes).on("tick", ticked);
+            simulation.force("link").links(currentData.links);
+            simulation.alpha(1).restart();
+
+            function ticked() {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
