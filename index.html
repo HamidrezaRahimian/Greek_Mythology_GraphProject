@@ -25,7 +25,7 @@
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 20px 0;
+            padding: 15px 0;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -39,94 +39,54 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
 
         .logo {
-            font-size: 2.5em;
+            font-size: 2em;
             font-weight: 700;
-            background: linear-gradient(45deg, #1565c0, #42a5f5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #1565c0;
         }
 
         .controls-panel {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
         }
 
-        .search-container {
-            position: relative;
+        .search-box,
+        .filter-select,
+        .limit-select {
+            padding: 8px 12px;
+            border: 2px solid #e3f2fd;
+            border-radius: 20px;
+            font-size: 14px;
+            background: white;
+            color: #1565c0;
         }
 
         .search-box {
-            padding: 12px 45px 12px 20px;
-            border: 2px solid #e3f2fd;
-            border-radius: 25px;
-            font-size: 16px;
-            width: 300px;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            width: 250px;
         }
 
-        .search-box:focus {
-            outline: none;
-            border-color: #1565c0;
-            box-shadow: 0 0 20px rgba(21, 101, 192, 0.2);
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #1565c0;
-            font-size: 18px;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .filter-select,
-        .limit-select {
-            padding: 10px 15px;
-            border: 2px solid #e3f2fd;
-            border-radius: 20px;
-            background: white;
-            color: #1565c0;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-select:focus,
-        .limit-select:focus {
-            outline: none;
-            border-color: #1565c0;
-        }
-
-        .clear-btn {
-            padding: 10px 20px;
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-            color: white;
+        .btn {
+            padding: 8px 16px;
             border: none;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 14px;
         }
 
-        .clear-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        .clear-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .center-btn {
+            background: #4ecdc4;
+            color: white;
         }
 
         .main-container {
@@ -134,15 +94,15 @@
             margin: 20px auto;
             padding: 0 20px;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 20px;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 120px);
         }
 
         .sidebar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
+            border-radius: 15px;
             padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
@@ -151,56 +111,62 @@
         .sidebar h3 {
             color: #1565c0;
             margin-bottom: 15px;
-            font-size: 1.2em;
+            font-size: 1.1em;
         }
 
         .relationship-filters {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .filter-checkbox {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-radius: 10px;
-            transition: background 0.3s ease;
-        }
-
-        .filter-checkbox:hover {
-            background: rgba(21, 101, 192, 0.1);
+            gap: 8px;
+            padding: 4px;
         }
 
         .filter-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #1565c0;
+            width: 16px;
+            height: 16px;
         }
 
         .stats-panel {
             margin-top: 20px;
             padding: 15px;
             background: rgba(21, 101, 192, 0.1);
-            border-radius: 15px;
+            border-radius: 10px;
         }
 
         .stat-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
 
-        .stat-value {
-            font-weight: 600;
-            color: #1565c0;
+        .zoom-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 5px;
+            flex-direction: column;
+        }
+
+        .zoom-btn {
+            background: #1565c0;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
         }
 
         .graph-container {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
+            border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
@@ -209,79 +175,61 @@
         #graph {
             width: 100%;
             height: 100%;
+            cursor: grab;
+        }
+
+        #graph:active {
+            cursor: grabbing;
         }
 
         .node {
             cursor: pointer;
-            stroke-width: 3px;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-            transition: all 0.3s ease;
+            stroke: #fff;
+            stroke-width: 2px;
         }
 
         .node:hover {
-            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.3));
-            transform: scale(1.1);
-        }
-
-        .node.highlighted {
             stroke: #ff6b6b;
-            stroke-width: 4px;
-            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8));
+            stroke-width: 3px;
         }
 
         .link {
-            stroke-width: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .link.highlighted {
-            stroke-width: 4px;
-            filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.6));
+            stroke: #999;
+            stroke-width: 1.5px;
+            stroke-opacity: 0.6;
         }
 
         .node-label {
             font-family: 'Segoe UI', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            fill: #1565c0;
+            fill: #333;
             text-anchor: middle;
             dominant-baseline: central;
             pointer-events: none;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
         .relationship-label {
             font-family: 'Segoe UI', sans-serif;
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 9px;
             fill: #666;
             text-anchor: middle;
             dominant-baseline: central;
             pointer-events: none;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2px 6px;
-            border-radius: 10px;
         }
 
         .tooltip {
             position: absolute;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             color: #1565c0;
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px solid #e3f2fd;
-            font-size: 13px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 12px;
             pointer-events: none;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            max-width: 250px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .tooltip.show {
-            opacity: 1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 200px;
         }
 
         .loading {
@@ -294,50 +242,29 @@
             color: #1565c0;
         }
 
-        .spinner {
-            border: 3px solid #e3f2fd;
-            border-top: 3px solid #1565c0;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
         .legend {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            font-size: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 11px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
 
         .legend-color {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            margin-right: 8px;
-            border: 2px solid rgba(21, 101, 192, 0.3);
+            margin-right: 6px;
+            border: 1px solid #ccc;
         }
 
         @media (max-width: 1024px) {
@@ -351,17 +278,8 @@
             }
 
             .graph-container {
-                height: 600px;
+                height: 500px;
                 order: 1;
-            }
-
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .search-box {
-                width: 250px;
             }
         }
     </style>
@@ -372,56 +290,58 @@
         <div class="header-content">
             <div class="logo">🏛️ Mythology Explorer</div>
             <div class="controls-panel">
-                <div class="search-container">
-                    <input type="text" class="search-box" id="searchBox" placeholder="Search for a character...">
-                    <span class="search-icon">🔍</span>
-                </div>
+                <input type="text" class="search-box" id="searchBox" placeholder="Search character...">
                 <select class="limit-select" id="limitSelect">
-                    <option value="25">Show 25 nodes</option>
-                    <option value="100">Show 100 nodes</option>
-                    <option value="all">Show all nodes</option>
+                    <option value="25">25 nodes</option>
+                    <option value="100">100 nodes</option>
+                    <option value="all">All nodes</option>
                 </select>
-                <button class="clear-btn" id="clearBtn">Clear Filters</button>
-                <button class="clear-btn" id="centerBtn"
-                    style="background: linear-gradient(45deg, #4ecdc4, #45b7d1);">Center Graph</button>
+                <button class="btn center-btn" id="centerBtn">Center Graph</button>
+                <button class="btn clear-btn" id="clearBtn">Clear Filters</button>
             </div>
         </div>
     </div>
 
     <div class="main-container">
         <div class="sidebar">
-            <h3>🔗 Relationship Filters</h3>
+            <h3>🔗 Relationships</h3>
             <div class="relationship-filters" id="relationshipFilters">
                 <!-- Dynamically populated -->
             </div>
 
+            <div class="zoom-controls">
+                <h3>🔍 Zoom & Pan</h3>
+                <button class="zoom-btn" id="zoomInBtn">Zoom In (+)</button>
+                <button class="zoom-btn" id="zoomOutBtn">Zoom Out (-)</button>
+                <button class="zoom-btn" id="fitBtn">Fit to Screen</button>
+                <button class="zoom-btn" id="resetBtn">Reset View</button>
+            </div>
+
             <div class="stats-panel">
-                <h3>📊 Statistics</h3>
+                <h3>📊 Stats</h3>
                 <div class="stat-item">
-                    <span>Nodes:</span>
-                    <span class="stat-value" id="nodeCount">0</span>
+                    <span>Total Nodes:</span>
+                    <span id="nodeCount">0</span>
                 </div>
                 <div class="stat-item">
-                    <span>Relationships:</span>
-                    <span class="stat-value" id="linkCount">0</span>
+                    <span>Total Links:</span>
+                    <span id="linkCount">0</span>
                 </div>
                 <div class="stat-item">
                     <span>Visible:</span>
-                    <span class="stat-value" id="visibleCount">0</span>
+                    <span id="visibleCount">0</span>
                 </div>
             </div>
         </div>
 
         <div class="graph-container">
             <div id="loading" class="loading">
-                <div class="spinner"></div>
                 <div>Loading Greek Mythology Data...</div>
-                <div style="font-size: 0.9em; margin-top: 10px;">Connecting to Neo4j...</div>
             </div>
             <svg id="graph"></svg>
 
             <div class="legend">
-                <h4 style="margin-bottom: 10px; color: #1565c0;">🎭 Character Types</h4>
+                <h4 style="margin-bottom: 8px; color: #1565c0;">Character Types</h4>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #ff6b6b;"></div>
                     <span>Olympian Gods</span>
@@ -440,7 +360,7 @@
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #feca57;"></div>
-                    <span>Mythological Characters</span>
+                    <span>Characters</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #a8e6cf;"></div>
@@ -460,13 +380,13 @@
                 this.filteredData = { nodes: [], links: [] };
                 this.simulation = null;
                 this.svg = null;
-                this.g = null; // Main group for zoom/pan
+                this.g = null;
                 this.zoom = null;
                 this.tooltip = null;
-                this.tooltipTimeout = null;
                 this.selectedRelationships = new Set();
                 this.searchTerm = '';
                 this.nodeLimit = 25;
+                this.tooltipTimeout = null;
 
                 this.colorMap = {
                     'Olympian god': '#ff6b6b',
@@ -477,14 +397,6 @@
                     'titan': '#a8e6cf',
                     'thunder deity': '#ff9f43',
                     'King of the Gods': '#ff6b6b'
-                };
-
-                this.relationshipColors = {
-                    'father': '#ff6b6b',
-                    'mother': '#ff8fab',
-                    'sibling': '#4ecdc4',
-                    'spouse': '#ff9f43',
-                    'child': '#45b7d1'
                 };
 
                 this.init();
@@ -515,6 +427,22 @@
                 document.getElementById('centerBtn').addEventListener('click', () => {
                     this.centerGraph();
                 });
+
+                document.getElementById('zoomInBtn').addEventListener('click', () => {
+                    this.zoomIn();
+                });
+
+                document.getElementById('zoomOutBtn').addEventListener('click', () => {
+                    this.zoomOut();
+                });
+
+                document.getElementById('fitBtn').addEventListener('click', () => {
+                    this.fitToScreen();
+                });
+
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetView();
+                });
             }
 
             setupVisualization() {
@@ -522,29 +450,29 @@
                 const width = container.clientWidth;
                 const height = container.clientHeight;
 
-                this.svg = d3.select('#graph').attr('width', width).attr('height', height);
-                this.tooltip = d3.select('#tooltip');
-
-                // Create main group for zoom/pan
-                this.g = this.svg.append('g');
+                this.svg = d3.select('#graph')
+                    .attr('width', width)
+                    .attr('height', height);
 
                 // Setup zoom behavior
                 this.zoom = d3.zoom()
-                    .scaleExtent([0.1, 4])
+                    .scaleExtent([0.1, 10])
                     .on('zoom', (event) => {
                         this.g.attr('transform', event.transform);
                     });
 
                 this.svg.call(this.zoom);
 
-                // Setup simulation with better performance
+                // Create main group for all graph elements
+                this.g = this.svg.append('g');
+
+                this.tooltip = d3.select('#tooltip');
+
                 this.simulation = d3.forceSimulation()
-                    .force('link', d3.forceLink().id(d => d.id).distance(120).strength(0.5))
-                    .force('charge', d3.forceManyBody().strength(-400))
+                    .force('link', d3.forceLink().id(d => d.id).distance(80))
+                    .force('charge', d3.forceManyBody().strength(-200))
                     .force('center', d3.forceCenter(width / 2, height / 2))
-                    .force('collision', d3.forceCollide().radius(35))
-                    .velocityDecay(0.4) // Faster settling
-                    .alphaDecay(0.02); // Smoother transitions
+                    .force('collision', d3.forceCollide().radius(25));
             }
 
             async connectToNeo4j() {
@@ -567,7 +495,7 @@
                         MATCH (n) 
                         OPTIONAL MATCH (n)-[r]->(m) 
                         RETURN n, r, m 
-                        LIMIT 200
+                        LIMIT 500
                     `);
 
                     this.processData(result.records);
@@ -614,8 +542,7 @@
                         links.push({
                             source: n.properties.id,
                             target: m.properties.id,
-                            relationship: r.properties.type || r.type,
-                            color: this.relationshipColors[r.properties.type] || '#999'
+                            relationship: r.properties.type || r.type
                         });
                     }
                 });
@@ -653,6 +580,7 @@
                         const label = document.createElement('label');
                         label.htmlFor = `rel-${rel}`;
                         label.textContent = rel;
+                        label.style.fontSize = '12px';
 
                         div.appendChild(checkbox);
                         div.appendChild(label);
@@ -724,22 +652,21 @@
             }
 
             createVisualization() {
-                this.svg.selectAll("*").remove();
+                // Clear previous visualization
+                this.g.selectAll("*").remove();
 
                 const data = this.filteredData;
                 if (data.nodes.length === 0) return;
 
                 // Create links
-                const link = this.svg.append('g')
+                const link = this.g.append('g')
                     .selectAll('line')
                     .data(data.links)
                     .enter().append('line')
-                    .attr('class', 'link')
-                    .attr('stroke', d => d.color)
-                    .attr('stroke-width', 2);
+                    .attr('class', 'link');
 
                 // Create relationship labels
-                const linkLabels = this.svg.append('g')
+                const linkLabels = this.g.append('g')
                     .selectAll('text')
                     .data(data.links)
                     .enter().append('text')
@@ -747,37 +674,37 @@
                     .text(d => d.relationship);
 
                 // Create nodes
-                const node = this.svg.append('g')
+                const node = this.g.append('g')
                     .selectAll('circle')
                     .data(data.nodes)
                     .enter().append('circle')
                     .attr('class', 'node')
-                    .attr('r', d => d.id === 'Zeus' ? 30 : 20)
+                    .attr('r', d => d.id === 'Zeus' ? 15 : 10)
                     .attr('fill', d => d.color)
-                    .attr('stroke', '#fff')
                     .call(d3.drag()
                         .on('start', this.dragstarted.bind(this))
                         .on('drag', this.dragged.bind(this))
                         .on('end', this.dragended.bind(this)));
 
-                // Create node labels
-                const nodeLabels = this.svg.append('g')
+                // Create node labels - these move with nodes
+                const nodeLabels = this.g.append('g')
                     .selectAll('text')
                     .data(data.nodes)
                     .enter().append('text')
                     .attr('class', 'node-label')
                     .text(d => d.label);
 
-                // Add interactions
-                node.on('mouseover', (event, d) => {
+                // Add hover interactions with timeout to prevent flashing
+                node.on('mouseenter', (event, d) => {
+                    clearTimeout(this.tooltipTimeout);
                     this.showTooltip(event, d);
-                    this.highlightConnections(d);
-                }).on('mouseout', () => {
-                    this.hideTooltip();
-                    this.clearHighlights();
+                }).on('mouseleave', () => {
+                    this.tooltipTimeout = setTimeout(() => {
+                        this.hideTooltip();
+                    }, 100);
                 });
 
-                // Setup simulation
+                // Setup simulation tick
                 this.simulation.nodes(data.nodes).on('tick', () => {
                     link
                         .attr('x1', d => d.source.x)
@@ -793,36 +720,14 @@
                         .attr('cx', d => d.x)
                         .attr('cy', d => d.y);
 
+                    // Move labels WITH nodes - this fixes the sync issue
                     nodeLabels
                         .attr('x', d => d.x)
-                        .attr('y', d => d.y + 5);
+                        .attr('y', d => d.y + 3);
                 });
 
                 this.simulation.force('link').links(data.links);
                 this.simulation.alpha(1).restart();
-            }
-
-            highlightConnections(selectedNode) {
-                const connectedLinks = this.filteredData.links.filter(l =>
-                    l.source.id === selectedNode.id || l.target.id === selectedNode.id
-                );
-
-                this.svg.selectAll('.link')
-                    .classed('highlighted', d => connectedLinks.includes(d));
-
-                const connectedNodeIds = new Set([selectedNode.id]);
-                connectedLinks.forEach(l => {
-                    connectedNodeIds.add(l.source.id);
-                    connectedNodeIds.add(l.target.id);
-                });
-
-                this.svg.selectAll('.node')
-                    .classed('highlighted', d => connectedNodeIds.has(d.id));
-            }
-
-            clearHighlights() {
-                this.svg.selectAll('.link').classed('highlighted', false);
-                this.svg.selectAll('.node').classed('highlighted', false);
             }
 
             showTooltip(event, d) {
@@ -839,16 +744,69 @@
                     .style('top', (event.pageY - 10) + 'px')
                     .html(`
                         <strong>${d.label}</strong><br/>
-                        <em>Type: ${d.type}</em><br/>
-                        <br/>
-                        <strong>Relationships:</strong><br/>
-                        ${connections.slice(0, 5).join('<br/>')}
-                        ${connections.length > 5 ? '<br/>...' : ''}
+                        <em>${d.type}</em><br/>
+                        ${connections.length > 0 ? '<hr style="margin: 5px 0;"/>' : ''}
+                        ${connections.slice(0, 3).join('<br/>')}
+                        ${connections.length > 3 ? '<br/>...' : ''}
                     `);
             }
 
             hideTooltip() {
                 this.tooltip.style('display', 'none');
+            }
+
+            // Zoom and pan controls
+            centerGraph() {
+                const container = this.svg.node().getBoundingClientRect();
+                const centerX = container.width / 2;
+                const centerY = container.height / 2;
+
+                this.svg.transition().duration(750).call(
+                    this.zoom.transform,
+                    d3.zoomIdentity.translate(centerX, centerY).scale(1)
+                );
+            }
+
+            zoomIn() {
+                this.svg.transition().duration(300).call(
+                    this.zoom.scaleBy, 1.5
+                );
+            }
+
+            zoomOut() {
+                this.svg.transition().duration(300).call(
+                    this.zoom.scaleBy, 1 / 1.5
+                );
+            }
+
+            fitToScreen() {
+                if (this.filteredData.nodes.length === 0) return;
+
+                const bounds = this.g.node().getBBox();
+                const parent = this.svg.node().getBoundingClientRect();
+                const fullWidth = parent.width;
+                const fullHeight = parent.height;
+                const width = bounds.width;
+                const height = bounds.height;
+                const midX = bounds.x + width / 2;
+                const midY = bounds.y + height / 2;
+
+                if (width == 0 || height == 0) return;
+
+                const scale = Math.min(fullWidth / width, fullHeight / height) * 0.8;
+                const translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+
+                this.svg.transition().duration(750).call(
+                    this.zoom.transform,
+                    d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+                );
+            }
+
+            resetView() {
+                this.svg.transition().duration(750).call(
+                    this.zoom.transform,
+                    d3.zoomIdentity
+                );
             }
 
             updateStats() {
@@ -863,7 +821,6 @@
                 this.searchTerm = '';
                 this.nodeLimit = 25;
 
-                // Check all relationship filters
                 document.querySelectorAll('#relationshipFilters input[type="checkbox"]').forEach(cb => {
                     cb.checked = true;
                 });
@@ -877,10 +834,7 @@
             }
 
             showError(message) {
-                document.getElementById('loading').innerHTML = `
-                    ❌ <strong>Error:</strong> ${message}<br/>
-                    <small>Please check console for more details</small>
-                `;
+                document.getElementById('loading').innerHTML = `❌ Error: ${message}`;
             }
 
             dragstarted(event, d) {
@@ -904,28 +858,26 @@
         // Initialize the application
         window.onload = async function () {
             if (typeof neo4j === "undefined") {
-                document.getElementById("loading").innerHTML = `
-                    ❌ <strong>Neo4j library failed to load!</strong><br/>
-                    Make sure your internet connection is working.<br/>
-                    <small>Using CDN: unpkg.com/neo4j-driver</small>
-                `;
+                document.getElementById("loading").innerHTML = `❌ Neo4j library failed to load!`;
                 return;
             }
 
-            new MythologyExplorer();
+            window.explorer = new MythologyExplorer();
         };
 
         // Handle window resize
         window.addEventListener('resize', () => {
-            const container = document.querySelector('.graph-container');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            if (window.explorer) {
+                const container = document.querySelector('.graph-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
 
-            d3.select('#graph').attr('width', width).attr('height', height);
+                d3.select('#graph').attr('width', width).attr('height', height);
 
-            if (window.explorer && window.explorer.simulation) {
-                window.explorer.simulation.force('center', d3.forceCenter(width / 2, height / 2));
-                window.explorer.simulation.alpha(0.3).restart();
+                if (window.explorer.simulation) {
+                    window.explorer.simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                    window.explorer.simulation.alpha(0.3).restart();
+                }
             }
         });
     </script>
