@@ -864,4 +864,41 @@
                 d.fy = event.y;
             }
 
-            dragended(event, d)
+            dragended(event, d) {
+                if (!event.active) this.simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        // Initialize the application
+        window.onload = async function () {
+            if (typeof neo4j === "undefined") {
+                document.getElementById("loading").innerHTML = `
+                    ❌ <strong>Neo4j library failed to load!</strong><br/>
+                    Make sure your internet connection is working.<br/>
+                    <small>Using CDN: unpkg.com/neo4j-driver</small>
+                `;
+                return;
+            }
+
+            new MythologyExplorer();
+        };
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.querySelector('.graph-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            d3.select('#graph').attr('width', width).attr('height', height);
+
+            if (window.explorer && window.explorer.simulation) {
+                window.explorer.simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                window.explorer.simulation.alpha(0.3).restart();
+            }
+        });
+    </script>
+</body>
+
+</html>
