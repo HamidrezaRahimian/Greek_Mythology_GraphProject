@@ -276,12 +276,6 @@
             z-index: 1000;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             max-width: 250px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .tooltip.show {
-            opacity: 1;
         }
 
         .loading {
@@ -382,8 +376,6 @@
                     <option value="all">Show all nodes</option>
                 </select>
                 <button class="clear-btn" id="clearBtn">Clear Filters</button>
-                <button class="clear-btn" id="centerBtn"
-                    style="background: linear-gradient(45deg, #4ecdc4, #45b7d1);">Center Graph</button>
             </div>
         </div>
     </div>
@@ -460,10 +452,7 @@
                 this.filteredData = { nodes: [], links: [] };
                 this.simulation = null;
                 this.svg = null;
-                this.g = null; // Main group for zoom/pan
-                this.zoom = null;
                 this.tooltip = null;
-                this.tooltipTimeout = null;
                 this.selectedRelationships = new Set();
                 this.searchTerm = '';
                 this.nodeLimit = 25;
@@ -511,10 +500,6 @@
                 document.getElementById('clearBtn').addEventListener('click', () => {
                     this.clearFilters();
                 });
-
-                document.getElementById('centerBtn').addEventListener('click', () => {
-                    this.centerGraph();
-                });
             }
 
             setupVisualization() {
@@ -525,26 +510,11 @@
                 this.svg = d3.select('#graph').attr('width', width).attr('height', height);
                 this.tooltip = d3.select('#tooltip');
 
-                // Create main group for zoom/pan
-                this.g = this.svg.append('g');
-
-                // Setup zoom behavior
-                this.zoom = d3.zoom()
-                    .scaleExtent([0.1, 4])
-                    .on('zoom', (event) => {
-                        this.g.attr('transform', event.transform);
-                    });
-
-                this.svg.call(this.zoom);
-
-                // Setup simulation with better performance
                 this.simulation = d3.forceSimulation()
-                    .force('link', d3.forceLink().id(d => d.id).distance(120).strength(0.5))
+                    .force('link', d3.forceLink().id(d => d.id).distance(120))
                     .force('charge', d3.forceManyBody().strength(-400))
                     .force('center', d3.forceCenter(width / 2, height / 2))
-                    .force('collision', d3.forceCollide().radius(35))
-                    .velocityDecay(0.4) // Faster settling
-                    .alphaDecay(0.02); // Smoother transitions
+                    .force('collision', d3.forceCollide().radius(35));
             }
 
             async connectToNeo4j() {
