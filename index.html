@@ -414,15 +414,7 @@
                     'mythological Greek character': '#feca57',
                     'titan': '#a8e6cf',
                     'thunder deity': '#ff9f43',
-                    'King of the Gods': '#ff6b6b',
-                    'Greek nymph': '#96ceb4',
-                    'personification': '#feca57',
-                    'naiad': '#45b7d1',
-                    'Giants': '#ff9f43',
-                    'Hecatoncheires': '#a8e6cf',
-                    'Anemoi': '#4ecdc4',
-                    'Greek primordial deity': '#ff6b6b',
-                    'Hamadryad': '#96ceb4'
+                    'King of the Gods': '#ff6b6b'
                 };
 
                 this.init();
@@ -517,12 +509,11 @@
             async loadData() {
                 const session = this.driver.session();
                 try {
-                    // Updated query to match your new data structure with Entity nodes and RELATED relationships
                     const result = await session.run(`
-                        MATCH (a:Entity) 
-                        OPTIONAL MATCH (a)-[r:RELATED]->(b:Entity) 
-                        RETURN a, r, b 
-                        LIMIT 2000
+                        MATCH (n) 
+                        OPTIONAL MATCH (n)-[r]->(m) 
+                        RETURN n, r, m 
+                        LIMIT 500
                     `);
 
                     this.processData(result.records);
@@ -532,7 +523,7 @@
 
                 } catch (error) {
                     console.error('❌ Data loading failed:', error);
-                    this.showError('Failed to load data from Neo4j. Please check your connection and database setup.');
+                    this.showError('Failed to load data');
                 } finally {
                     await session.close();
                 }
@@ -543,42 +534,33 @@
                 const links = [];
 
                 records.forEach(record => {
-                    const a = record.get('a');
+                    const n = record.get('n');
                     const r = record.get('r');
-                    const b = record.get('b');
+                    const m = record.get('m');
 
-                    // Process first node (a) - Entity node
-                    if (a && a.properties) {
-                        const nodeId = a.properties.id || a.properties.label || 'unknown';
-                        if (!nodes.has(nodeId)) {
-                            nodes.set(nodeId, {
-                                id: nodeId,
-                                label: a.properties.label || a.properties.id || nodeId,
-                                type: a.properties.type || 'unknown',
-                                color: this.colorMap[a.properties.type] || '#888'
-                            });
-                        }
+                    if (n && !nodes.has(n.properties.id)) {
+                        nodes.set(n.properties.id, {
+                            id: n.properties.id,
+                            label: n.properties.label || n.properties.id,
+                            type: n.properties.type,
+                            color: this.colorMap[n.properties.type] || '#888'
+                        });
                     }
 
-                    // Process second node (b) and relationship if they exist
-                    if (b && b.properties && r && r.properties) {
-                        const nodeBId = b.properties.id || b.properties.label || 'unknown';
-                        const nodeAId = a.properties.id || a.properties.label || 'unknown';
-
-                        if (!nodes.has(nodeBId)) {
-                            nodes.set(nodeBId, {
-                                id: nodeBId,
-                                label: b.properties.label || b.properties.id || nodeBId,
-                                type: b.properties.type || 'unknown',
-                                color: this.colorMap[b.properties.type] || '#888'
+                    if (m && r) {
+                        if (!nodes.has(m.properties.id)) {
+                            nodes.set(m.properties.id, {
+                                id: m.properties.id,
+                                label: m.properties.label || m.properties.id,
+                                type: m.properties.type,
+                                color: this.colorMap[m.properties.type] || '#888'
                             });
                         }
 
-                        // Create relationship link
                         links.push({
-                            source: nodeAId,
-                            target: nodeBId,
-                            relationship: r.properties.type || 'related'
+                            source: n.properties.id,
+                            target: m.properties.id,
+                            relationship: r.properties.type || r.type
                         });
                     }
                 });
@@ -588,48 +570,43 @@
                     links
                 };
 
-                console.log(`✅ Processed ${this.allData.nodes.length} nodes and ${this.allData.links.length} links`);
                 this.updateStats();
             }
 
             createRelationshipFilters() {
-                const relationships = [...new Set(this.allData.links.map(l => l.relationship))].filter(rel => rel);
+                const relationships = [...new Set(this.allData.links.map(l => l.relationship))];
                 const container = document.getElementById('relationshipFilters');
 
-                // Clear existing filters
-                container.innerHTML = '';
+                relationships.forEach(rel => {
+                    if (rel) {
+                        const div = document.createElement('div');
+                        div.className = 'filter-checkbox';
 
-                relationships.sort().forEach(rel => {
-                    const div = document.createElement('div');
-                    div.className = 'filter-checkbox';
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `rel-${rel}`;
+                        checkbox.checked = true;
+                        checkbox.addEventListener('change', () => {
+                            if (checkbox.checked) {
+                                this.selectedRelationships.add(rel);
+                            } else {
+                                this.selectedRelationships.delete(rel);
+                            }
+                            this.updateVisualization();
+                        });
 
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `rel-${rel}`;
-                    checkbox.checked = true;
-                    checkbox.addEventListener('change', () => {
-                        if (checkbox.checked) {
-                            this.selectedRelationships.add(rel);
-                        } else {
-                            this.selectedRelationships.delete(rel);
-                        }
-                        this.updateVisualization();
-                    });
+                        const label = document.createElement('label');
+                        label.htmlFor = `rel-${rel}`;
+                        label.textContent = rel;
+                        label.style.fontSize = '12px';
 
-                    const label = document.createElement('label');
-                    label.htmlFor = `rel-${rel}`;
-                    label.textContent = rel;
-                    label.style.fontSize = '12px';
-                    label.style.cursor = 'pointer';
+                        div.appendChild(checkbox);
+                        div.appendChild(label);
+                        container.appendChild(div);
 
-                    div.appendChild(checkbox);
-                    div.appendChild(label);
-                    container.appendChild(div);
-
-                    this.selectedRelationships.add(rel);
+                        this.selectedRelationships.add(rel);
+                    }
                 });
-
-                console.log(`✅ Created ${relationships.length} relationship filters`);
             }
 
             updateVisualization() {
@@ -639,66 +616,48 @@
             }
 
             filterData() {
-                let filteredNodes = [...this.allData.nodes];
-                let filteredLinks = [...this.allData.links];
+                let filteredNodes = this.allData.nodes;
+                let filteredLinks = this.allData.links;
 
-                // Filter by relationship selection first
+                // Filter by search term
+                if (this.searchTerm) {
+                    const searchNodes = filteredNodes.filter(n =>
+                        n.label.toLowerCase().includes(this.searchTerm)
+                    );
+
+                    const connectedNodeIds = new Set();
+                    searchNodes.forEach(n => connectedNodeIds.add(n.id));
+
+                    filteredLinks.forEach(l => {
+                        if (connectedNodeIds.has(l.source.id || l.source) ||
+                            connectedNodeIds.has(l.target.id || l.target)) {
+                            connectedNodeIds.add(l.source.id || l.source);
+                            connectedNodeIds.add(l.target.id || l.target);
+                        }
+                    });
+
+                    filteredNodes = filteredNodes.filter(n => connectedNodeIds.has(n.id));
+                }
+
+                // Filter by relationships
                 filteredLinks = filteredLinks.filter(l =>
                     this.selectedRelationships.has(l.relationship)
                 );
 
-                // Get connected nodes from filtered links
+                // Get connected nodes
                 const connectedNodeIds = new Set();
                 filteredLinks.forEach(l => {
                     connectedNodeIds.add(l.source.id || l.source);
                     connectedNodeIds.add(l.target.id || l.target);
                 });
 
-                // Filter by search term
-                if (this.searchTerm) {
-                    const searchMatchNodes = filteredNodes.filter(n =>
-                        n.label.toLowerCase().includes(this.searchTerm) ||
-                        n.id.toLowerCase().includes(this.searchTerm)
-                    );
-
-                    // Add nodes that match search term
-                    const searchNodeIds = new Set(searchMatchNodes.map(n => n.id));
-
-                    // Also include nodes connected to search matches
-                    filteredLinks.forEach(l => {
-                        const sourceId = l.source.id || l.source;
-                        const targetId = l.target.id || l.target;
-
-                        if (searchNodeIds.has(sourceId) || searchNodeIds.has(targetId)) {
-                            connectedNodeIds.add(sourceId);
-                            connectedNodeIds.add(targetId);
-                        }
-                    });
-                }
-
-                // Filter nodes to only include connected ones
                 filteredNodes = filteredNodes.filter(n =>
                     connectedNodeIds.has(n.id) ||
-                    (this.searchTerm && (
-                        n.label.toLowerCase().includes(this.searchTerm) ||
-                        n.id.toLowerCase().includes(this.searchTerm)
-                    ))
+                    (this.searchTerm && n.label.toLowerCase().includes(this.searchTerm))
                 );
 
                 // Apply node limit
                 if (filteredNodes.length > this.nodeLimit) {
-                    // Sort to prioritize important nodes (you can customize this)
-                    filteredNodes.sort((a, b) => {
-                        // Prioritize nodes that match search term
-                        if (this.searchTerm) {
-                            const aMatches = a.label.toLowerCase().includes(this.searchTerm);
-                            const bMatches = b.label.toLowerCase().includes(this.searchTerm);
-                            if (aMatches && !bMatches) return -1;
-                            if (!aMatches && bMatches) return 1;
-                        }
-                        return a.label.localeCompare(b.label);
-                    });
-
                     filteredNodes = filteredNodes.slice(0, this.nodeLimit);
                     const limitedNodeIds = new Set(filteredNodes.map(n => n.id));
                     filteredLinks = filteredLinks.filter(l =>
@@ -715,10 +674,7 @@
                 this.g.selectAll("*").remove();
 
                 const data = this.filteredData;
-                if (data.nodes.length === 0) {
-                    console.log('No data to visualize');
-                    return;
-                }
+                if (data.nodes.length === 0) return;
 
                 // Create links
                 const link = this.g.append('g')
@@ -741,12 +697,7 @@
                     .data(data.nodes)
                     .enter().append('circle')
                     .attr('class', 'node')
-                    .attr('r', d => {
-                        // Make Zeus and other important figures larger
-                        if (d.id === 'Zeus' || d.label === 'Zeus') return 15;
-                        if (d.type === 'Olympian god') return 12;
-                        return 10;
-                    })
+                    .attr('r', d => d.id === 'Zeus' ? 15 : 10)
                     .attr('fill', d => d.color)
                     .call(d3.drag()
                         .on('start', this.dragstarted.bind(this))
@@ -799,13 +750,10 @@
 
             showTooltip(event, d) {
                 const connections = this.filteredData.links
-                    .filter(l => (l.source.id === d.id || l.source === d.id) ||
-                        (l.target.id === d.id || l.target === d.id))
+                    .filter(l => l.source.id === d.id || l.target.id === d.id)
                     .map(l => {
-                        const isSource = (l.source.id === d.id || l.source === d.id);
-                        const other = isSource ? l.target : l.source;
-                        const otherLabel = other.label || other.id || other;
-                        return `${l.relationship}: ${otherLabel}`;
+                        const other = l.source.id === d.id ? l.target : l.source;
+                        return `${l.relationship}: ${other.label || other.id}`;
                     });
 
                 this.tooltip
@@ -816,8 +764,8 @@
                         <strong>${d.label}</strong><br/>
                         <em>${d.type}</em><br/>
                         ${connections.length > 0 ? '<hr style="margin: 5px 0;"/>' : ''}
-                        ${connections.slice(0, 5).join('<br/>')}
-                        ${connections.length > 5 ? '<br/>...' : ''}
+                        ${connections.slice(0, 3).join('<br/>')}
+                        ${connections.length > 3 ? '<br/>...' : ''}
                     `);
             }
 
@@ -849,14 +797,6 @@
                 );
             }
 
-            fitToScreen() {
-                if (this.filteredData.nodes.length === 0) return;
-
-                const bounds = this.g.node().getBBox();
-                const parent = this.svg.node().getBoundingClientRect();
-                const fullWidth = parent.width;
-                const fullHeight = parent.height;
-            }
             fitToScreen() {
                 if (this.filteredData.nodes.length === 0) return;
 
