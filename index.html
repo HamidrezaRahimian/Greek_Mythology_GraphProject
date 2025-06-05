@@ -542,7 +542,7 @@
                             id: n.properties.id,
                             label: n.properties.label || n.properties.id,
                             type: n.properties.type,
-                            color: this.colorMap[(n.properties.type || '').toLowerCase()] || '#888'
+                            color: this.colorMap[n.properties.type] || '#888'
                         });
                     }
 
@@ -552,14 +552,16 @@
                                 id: m.properties.id,
                                 label: m.properties.label || m.properties.id,
                                 type: m.properties.type,
-                                color: this.colorMap[(m.properties.type || '').toLowerCase()] || '#888'
+                                color: this.colorMap[m.properties.type] || '#888'
                             });
                         }
 
                         links.push({
                             source: n.properties.id,
                             target: m.properties.id,
-                            relationship: r.properties.type || r.type
+                            relationship: r.properties.type || r.type,
+                            color: this.relationshipColors[r.properties.type] || '#999'
+
                         });
                     }
                 });
